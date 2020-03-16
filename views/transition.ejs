@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C/DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Personality Transition</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+<link rel="shortcut icon" href="/personality_transition.png" type="image/png"/>
+<link rel="icon" href="/personality_transition.png" type="image/png"/>
+<link rel="apple-touch-icon" href="/personality_transition.png"/>
+
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="apple-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-title" content="TwitterCP"/>
+
+<!-- // OGP tags -->
+<meta property="og:title" content="Personality Transition - Twitter を元にした <%= user.screen_name %> の AI 性格推移分析"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://personality-transition.mybluemix.net/transition/<%= id %>"/>
+<meta property="og:image" content="https://personality-transition.mybluemix.net/personality_transition.png"/>
+<meta property="og:site_name" content="Personality Transition"/>
+<!-- OGP tags // -->
+
+<!-- // Twitter Card -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:site" content="@dotnsf"/>
+<meta property="twitter:creator" content="@dotnsf"/>
+<meta property="twitter:url" content="https://personality-transition.mybluemix.net/transition/<%= id %>"/>
+<meta property="twitter:image" content="https://personality-transition.mybluemix.net/personality_transition.png"/>
+<meta property="twitter:title" content="Personality Transition"/>
+<meta property="twitter:description" content="Personality Transition"/>
+<!-- Twitter Card // -->
+
+<meta name="description" content="Personality Transition"/>
+<meta name="keywords" content="Personality Transition"/>
+
+<script src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.3.0/js/bootstrap.min.js"></script>
+<link href="//use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.js"></script>
+
+<script>
+var id = '<%= id %>';
+var data_labels = [];
+var chart = null;
+$(function(){
+  $('#navbar').append( '<li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-sign-in-alt"></i>自分も試してみる</a></li>' );
+
+  if( id ){
+    $.ajax({
+      url: '/get/' + id,
+      type: 'GET',
+      success: function( doc ){
+        if( doc.status && doc.doc.results != null && doc.doc.results[0] != null ){
+          var labels = [];
+          var datasets = [];
+          $('#slider').prop( 'max', doc.doc.results.length - 1 );
+          $('#slider').val( doc.doc.results.length - 1 );
+          for( var i = 0; i < doc.doc.results.length; i ++ ){
+            var result = doc.doc.results[i];
+            var d = [];
+            for( var j = 0; j < result.personality.length; j ++ ){
+              var p = result.personality[j];
+              p.children.forEach( function( p_c ){
+                if( i == 0 ){
+                  labels.push( p_c.name )
+                }
+                d.push( p_c.percentile );
+              });
+            }
+
+            var dt = timestamp2datetime( ( new Date( doc.doc.tweeteds[i] ) ).getTime() );
+            data_labels.unshift( dt );
+            var dataset = {
+              data: d,
+              label: dt,
+              backgroundColor: 'rgb(255,200,200,0.6)',
+              borderColor: 'rgb(255,0,0,0.6)',
+              pointBackgroundColor: 'rgb(255,0,0,0.6)'
+            };
+            datasets.unshift( dataset );
+          }
+
+          var data = {
+            labels: labels,
+            datasets: datasets
+          };
+
+          chart = new Chart( 'myChart', {
+            type: 'radar',
+            data: data,
+            options: {
+              legend: { display: false }
+            }
+          });
+          sliderChange();
+        }
+      },
+      error: function( e0, e1, e2 ){
+        console.log( e1 + ' : ' + e2 );
+      }
+    });
+  }
+});
+
+function timestamp2datetime( ts ){
+  var dt = new Date( ts );
+  var yyyy = dt.getFullYear();
+  var mm = dt.getMonth() + 1;
+  var dd = dt.getDate();
+  var hh = dt.getHours();
+  var nn = dt.getMinutes();
+  var ss = dt.getSeconds();
+  var datetime = yyyy + '-' + ( mm < 10 ? '0' : '' ) + mm + '-' + ( dd < 10 ? '0' : '' ) + dd
+    + ' ' + ( hh < 10 ? '0' : '' ) + hh + ':' + ( nn < 10 ? '0' : '' ) + nn + ':' + ( ss < 10 ? '0' : '' ) + ss;
+  //var datetime = yyyy + '年' + mm + '月' + dd + '日';
+  return datetime;
+}
+
+function sliderChange(){
+  var v = $('#slider').val();
+  $('#slider_value').html( data_labels[v] );
+
+  //. v 以外のデータを非表示にしたい
+  chart.data.datasets.forEach( function( dataset ){
+    dataset.hidden = true;
+  });
+  chart.data.datasets[v].hidden = false;
+  chart.update();
+}
+</script>
+<style>
+#my_wrapper{
+  height: 100%;
+  background: linear-gradient(90deg, rgb(0,23,55), rgb(31,74,115));
+}
+#my_inner{
+  height: 90%;
+  background: linear-gradient(180deg, rgb(248,248,248), rgb(44,116,150));
+}
+.my-slider{
+  position: relative;
+  top: -20px;
+  z-index: 1;
+  width: 100%;
+  color: #ee9219;
+  background: #fafafa;
+  padding: 30px 30px 30px 30px;
+  margin: 50px 10px 10px 10px;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #fafafa;
+}
+#slider_value{
+  color: #fff;
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="#">Personality Transition</a>
+  <ul class="navbar-nav">
+  </ul>
+  <ul class="navbar-nav float-right" style="float:right!important;" id="navbar">
+  </ul>
+</nav>
+
+<div class="container" id="my_wrapper" style="padding: 100px 50px 50px 50px;">
+  <div>
+    <table>
+      <tr><td>
+        <a id="share_twitter" title="Twitter でシェア" target="_blank" href="https://twitter.com/share?url=https://personality-transition.mybluemix.net%2Ftransition%2F<%= id %>&text=<%= datetime %>までのツイート内容で性格推移分析を行った結果です。&amp;hashtag=personality_transition"><img src="/share_twitter.png"/></a>
+      </td><td>
+        <a id="share_facebook" title="facebook でシェア" href="https://www.facebook.com/share.php?u=https://personality-transition.mybluemix.net%2Ftransition%2F<%= id %>" onclick="window.open(this.href,'FBwindow','width=650,height=450,menubar=no,toolbar=no,scrollbas=yes'); return false;"><img src="/share_facebook.png"/></a>
+      </td><td>
+        <a id="share_line" title="LINE でシェア" href="https://social-plugins.line.me/lineit/share?url=https://personality-transition.mybluemix.net%2Ftransition%2F<%= id %>" onclick="window.open(this.href,'Linewindow','width=650,height=450,menubar=no,toolbar=no,scrollbas=yes'); return false;"><img src="/share_line.png"/></a>
+      </td></tr>
+    <table>
+  </div>
+
+  <div id="my_inner" style="padding: 50px 50px 50px 50px;">
+
+  <div class="row">
+    <div class="col">
+    <div style="text-align: center">
+      <img src="/profileimage?screen_name=<%= user.screen_name %>" style="width:200px; height: 200px;"/><br/>
+      <h3><%= user.screen_name %></h3>
+      <div class="progress" style="width: 30%; margin-left: auto; margin-right: auto;">
+        <div class="progress-bar bg-success" style="width: 100%;"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="my-slider">
+        <canvas id="myChart"></canvas>
+      </div>
+      <table class="table">
+        <tr>
+          <td width="80%">
+            <input class="form-control" id="slider" type="range" value="0" min="0" max="10" step="1" oninput="sliderChange();"/>
+          </td>
+          <td>
+            <span id="slider_value"></span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

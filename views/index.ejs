@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C/DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Personality Transition</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+<link rel="shortcut icon" href="/personality_transition.png" type="image/png"/>
+<link rel="icon" href="/personality_transition.png" type="image/png"/>
+<link rel="apple-touch-icon" href="/personality_transition.png"/>
+
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="apple-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-title" content="Personality Transition"/>
+
+<!-- // OGP tags -->
+<meta property="og:title" content="Personality Transition - Twitter を元にした AI 性格推移分析"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://personality-transition.mybluemix.net/"/>
+<meta property="og:image" content="https://personality-transition.mybluemix.net/personality_transition.png"/>
+<meta property="og:site_name" content="Personality Transition"/>
+<!-- OGP tags // -->
+
+<!-- // Twitter Card -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:site" content="@dotnsf"/>
+<meta property="twitter:creator" content="@dotnsf"/>
+<meta property="twitter:url" content="https://personality-transition.mybluemix.net/"/>
+<meta property="twitter:image" content="https://personality-transition.mybluemix.net/personality_transition.png"/>
+<meta property="twitter:title" content="Personality Transition"/>
+<meta property="twitter:description" content="Personality Transition"/>
+<!-- Twitter Card // -->
+
+<meta name="description" content="Personality Transition"/>
+<meta name="keywords" content="Personality Transition"/>
+
+
+<script src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.3.0/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.3.0/js/bootstrap.min.js"></script>
+<link href="//use.fontawesome.com/releases/v5.6.3/css/all.css" rel="stylesheet"/>
+
+
+<script>
+$(function(){
+  $('#navbar').append( '<li class="nav-item"><a class="nav-link" href="#" onClick="login()"><i class="fas fa-sign-in-alt"></i>Login</a></li>' );
+});
+
+function login(){
+  //window.location.href = '/login';
+  window.location.href = '/twitter';
+}
+</script>
+<style>
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="#">Personality Transition</a>
+  <ul class="navbar-nav mr-auto">
+  </ul>
+  <ul class="navbar-nav float-right" style="float:right!important;" id="navbar">
+  </ul>
+</nav>
+
+<div class="container" style="padding: 50px 50px 50px 50px;">
+  画面右上の "Login" と書かれたボタンをタップ（クリック）し、Twitter ID でログインしてください。
+  直近の 200 ツイートの内容を元に AI があなたの性格の推移を分析します。<p/>
+</div>
+
+</body>
+</html>
