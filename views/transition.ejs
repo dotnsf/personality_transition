@@ -216,6 +216,16 @@ function sliderChange(){
   }
   $('.cp-'+v).css( 'display', 'block' );
 }
+
+function displayToggle( selector ){
+  var display_attr = $(selector).css( 'display' );
+
+  if( display_attr == 'none' ){
+    $(selector).css( 'display', 'block' );
+  }else{
+    $(selector).css( 'display', 'none' );
+  }
+}
 </script>
 <style>
 #my_wrapper{
@@ -246,6 +256,9 @@ function sliderChange(){
   top: 50px;
   text-align: center;
 }
+.subtitle{
+  color: #ee9219;
+}
 #consumption_preferences{
   height: 200px;
   overflow-y: scroll;
@@ -262,6 +275,33 @@ function sliderChange(){
 }
 .td-cp-0{
   color: #ddd;
+}
+
+.input-range[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #c7c7c7;
+  height: 2px;
+  width: 100%;
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+    border: none;
+    width: 12px;
+    height: 12px;
+    display: block;
+    background-color: #262626;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+  }
 }
 </style>
 </head>
@@ -304,13 +344,14 @@ function sliderChange(){
 
     <div class="row">
       <div class="col">
-        <div class="my-slider">
+        <h3 class="subtitle" onClick="displayToggle('#div_chart');" title="クリックで表示／非表示">性格分析</h3>
+        <div class="my-slider" id="div_chart" style="display: block;">
           <canvas id="myChart"></canvas>
           <div id="category"></div>
         </div>
 
-        <div class="my-slider" id="consumption_preferences">
-          <h2>消費行動傾向</h2>
+        <h3 class="subtitle" onClick="displayToggle('#consumption_preferences');" title="クリックで表示／非表示">消費行動傾向</h3>
+        <div class="my-slider" id="consumption_preferences" style="display: none;">
           <table class="mytable" id="consumption_preferences_table">
             <tbody id="consumption_preferences_table_tbody">
             </tbody>
@@ -320,7 +361,7 @@ function sliderChange(){
         <table class="table">
           <tr>
             <td width="80%">
-              <input class="form-control" id="slider" type="range" value="0" min="0" max="10" step="1" oninput="sliderChange();"/>
+              <input class="input-range" id="slider" type="range" value="0" min="0" max="10" step="1" oninput="sliderChange();"/>
             </td>
             <td>
               <span id="slider_value"></span>
