@@ -135,7 +135,7 @@ app.get( '/twitter/callback', function( req, res ){
             for( var i = 0; i < block_count; i ++ ){
               var text = '';
               for( var j = 0; j < count_per_block; j ++ ){
-                var tweet = tweets[block_count*i+j];
+                var tweet = tweets[count_per_block*i+j];
                 //console.log( tweet );  //. tweet.created_at = 'Tue Mar 03 15:03:15 +0000 2020'
                 if( j == 0 ){
                   created_ats.push( tweet.created_at );
@@ -147,7 +147,8 @@ app.get( '/twitter/callback', function( req, res ){
               var pi_params = {
                 content: text,
                 contentType: 'text/plain',
-                consumption_preferences: true,
+                //consumption_preferences: true,
+                consumptionPreferences: true,
                 raw_scores: true,
                 headers: {
                   'accept-language': 'ja',

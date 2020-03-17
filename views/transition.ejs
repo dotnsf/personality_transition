@@ -44,6 +44,21 @@
 var id = '<%= id %>';
 var data_labels = [];
 var chart = null;
+
+var base_colors = [
+  //. https://cloud.ibm.com/docs/services/personality-insights?topic=personality-insights-agreeableness
+  { name: '知的好奇心', color: '#800', desc: 'さまざまな活動の経験に対して前向きである' },  //. big5 - 知的好奇心
+  { name: '誠実性', color: '#080', desc: '組織的な思慮深い方法で行動する' },     //. big5 - 誠実性
+  { name: '外向性', color: '#008', desc: '他人との付き合いで刺激を求める' },     //. big5 - 外向性
+  { name: '協調性', color: '#880', desc: '他人に対して思いやりを持ち協力的になる' },     //. big5 - 協調性
+  { name: '感情起伏', color: '#808', desc: '個人の感情が自分の行動に影響する' },   //. big5 - 感情起伏
+  { name: 'ニーズ', color: '#088', desc: '共感を呼ぶ度合い' },       //. needs
+  { name: '価値', color: '#888', desc: '意思決定に影響を及ぼす動機づけ要因' },       //. values
+  { name: '', color: '#255', desc: '' }        //. for consumption_preferences
+];
+
+var consumption_preferences = [];
+
 $(function(){
   $('#navbar').append( '<li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-sign-in-alt"></i>自分も試してみる</a></li>' );
 
@@ -54,20 +69,58 @@ $(function(){
       success: function( doc ){
         if( doc.status && doc.doc.results != null && doc.doc.results[0] != null ){
           var labels = [];
+          var label_colors = [];
           var datasets = [];
           $('#slider').prop( 'max', doc.doc.results.length - 1 );
           $('#slider').val( doc.doc.results.length - 1 );
           for( var i = 0; i < doc.doc.results.length; i ++ ){
             var result = doc.doc.results[i];
             var d = [];
+
+            //. personality
             for( var j = 0; j < result.personality.length; j ++ ){
               var p = result.personality[j];
               p.children.forEach( function( p_c ){
                 if( i == 0 ){
                   labels.push( p_c.name )
+                  label_colors.push( base_colors[j].color )
                 }
                 d.push( p_c.percentile );
               });
+            }
+
+            //. needs
+            for( var j = 0; j < result.needs.length; j ++ ){
+              var n = result.needs[j];
+              if( i == 0 ){
+                labels.push( n.name )
+                label_colors.push( base_colors[5].color )
+              }
+              d.push( n.percentile );
+            }
+
+            //. values
+            for( var j = 0; j < result.values.length; j ++ ){
+              var v = result.values[j];
+              if( i == 0 ){
+                labels.push( v.name )
+                label_colors.push( base_colors[6].color )
+              }
+              d.push( v.percentile );
+            }
+
+            //. consumption_preferences
+            if( result.consumption_preferences !== undefined ){
+              for( var j = 0; j < result.consumption_preferences.length; j ++ ){
+                var c = result.consumption_preferences[j];
+
+                var c_name = c.name;
+                var consumption_preference = [];
+                c.consumption_preferences.forEach( function( c_c ){
+                  consumption_preference.push( { index: i, cat: c_name, cat_index: j, name: c_c.name, score: c_c.score } );
+                });
+                consumption_preferences.push( consumption_preference );
+              }
             }
 
             var dt = timestamp2datetime( ( new Date( doc.doc.tweeteds[i] ) ).getTime() );
@@ -82,6 +135,7 @@ $(function(){
             datasets.unshift( dataset );
           }
 
+          //. チャート描画
           var data = {
             labels: labels,
             datasets: datasets
@@ -91,9 +145,36 @@ $(function(){
             type: 'radar',
             data: data,
             options: {
-              legend: { display: false }
+              legend: { display: false },
+              scale: {
+                pointLabels: {
+                  fontColor: label_colors
+                }
+              }
             }
           });
+
+          //. category
+          var category = '';
+          base_colors.forEach( function( base_color ){
+            var span = '<span style="color: ' + base_color.color + '" title="' + base_color.desc + '">' + base_color.name + '</span> ';
+            category += span;
+          });
+          $('#category').html( category );
+
+          //. consumption_preferences
+          if( consumption_preferences && consumption_preferences.length > 0 ){
+            consumption_preferences.forEach( function( consumption_preference ){
+              consumption_preference.forEach( function( cp ){
+                var tr = '<tr class="cp-' + cp.index + '">'
+                  + '<td class="td-cp-' + cp.score + ' td-cp">' + cp.name + '</td>'
+                  + '</tr>';
+                console.log( tr );
+                $('#consumption_preferences_table_tbody').append( tr );
+              });
+            });
+          }
+
           sliderChange();
         }
       },
@@ -128,6 +209,12 @@ function sliderChange(){
   });
   chart.data.datasets[v].hidden = false;
   chart.update();
+
+  //. consumption_preferences
+  for( var i = 0; i < base_colors.length; i ++ ){
+    $('.cp-'+i).css( 'display', 'none' );
+  }
+  $('.cp-'+v).css( 'display', 'block' );
 }
 </script>
 <style>
@@ -155,6 +242,27 @@ function sliderChange(){
 #slider_value{
   color: #fff;
 }
+#category{
+  top: 50px;
+  text-align: center;
+}
+#consumption_preferences{
+  height: 200px;
+  overflow-y: scroll;
+}
+.mytable{
+  width: 100%;
+}
+.td-cp{
+  color: #888;
+}
+.td-cp-1{
+  font-weight: bold;
+  color: #136;
+}
+.td-cp-0{
+  color: #ddd;
+}
 </style>
 </head>
 <body>
@@ -177,38 +285,49 @@ function sliderChange(){
       </td><td>
         <a id="share_line" title="LINE でシェア" href="https://social-plugins.line.me/lineit/share?url=https://personality-transition.mybluemix.net%2Ftransition%2F<%= id %>" onclick="window.open(this.href,'Linewindow','width=650,height=450,menubar=no,toolbar=no,scrollbas=yes'); return false;"><img src="/share_line.png"/></a>
       </td></tr>
-    <table>
+    </table>
   </div>
 
   <div id="my_inner" style="padding: 50px 50px 50px 50px;">
 
-  <div class="row">
-    <div class="col">
-    <div style="text-align: center">
-      <img src="/profileimage?screen_name=<%= user.screen_name %>" style="width:200px; height: 200px;"/><br/>
-      <h3><%= user.screen_name %></h3>
-      <div class="progress" style="width: 30%; margin-left: auto; margin-right: auto;">
-        <div class="progress-bar bg-success" style="width: 100%;"></div>
+    <div class="row">
+      <div class="col">
+      <div style="text-align: center">
+        <img src="/profileimage?screen_name=<%= user.screen_name %>" style="width:200px; height: 200px;"/><br/>
+        <h3><%= user.screen_name %></h3>
+        <div class="progress" style="width: 30%; margin-left: auto; margin-right: auto;">
+          <div class="progress-bar bg-success" style="width: 100%;"></div>
+        </div>
+      </div>
       </div>
     </div>
-    </div>
-  </div>
 
-  <div class="row">
-    <div class="col">
-      <div class="my-slider">
-        <canvas id="myChart"></canvas>
+    <div class="row">
+      <div class="col">
+        <div class="my-slider">
+          <canvas id="myChart"></canvas>
+          <div id="category"></div>
+        </div>
+
+        <div class="my-slider" id="consumption_preferences">
+          <h2>消費行動傾向</h2>
+          <table class="mytable" id="consumption_preferences_table">
+            <tbody id="consumption_preferences_table_tbody">
+            </tbody>
+          </table>
+        </div>
+
+        <table class="table">
+          <tr>
+            <td width="80%">
+              <input class="form-control" id="slider" type="range" value="0" min="0" max="10" step="1" oninput="sliderChange();"/>
+            </td>
+            <td>
+              <span id="slider_value"></span>
+            </td>
+          </tr>
+        </table>
       </div>
-      <table class="table">
-        <tr>
-          <td width="80%">
-            <input class="form-control" id="slider" type="range" value="0" min="0" max="10" step="1" oninput="sliderChange();"/>
-          </td>
-          <td>
-            <span id="slider_value"></span>
-          </td>
-        </tr>
-      </table>
     </div>
   </div>
 </div>
