@@ -158,7 +158,7 @@ $(function(){
           var category = '';
           base_colors.forEach( function( base_color ){
             var span = '<span style="color: ' + base_color.color + '" title="' + base_color.desc + '">' + base_color.name + '</span> ';
-            category += span;
+            category = span + category; //. 逆順に追加したほうが見やすい
           });
           $('#category').html( category );
 
