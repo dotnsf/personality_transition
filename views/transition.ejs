@@ -121,6 +121,8 @@ $(function(){
                 });
                 consumption_preferences.push( consumption_preference );
               }
+            }else{
+              $('#part_consumption_preferences').css( 'display', 'none' );  //. #1
             }
 
             var dt = timestamp2datetime( ( new Date( doc.doc.tweeteds[i] ) ).getTime() );
@@ -221,8 +223,10 @@ function displayToggle( selector ){
 
   if( display_attr == 'none' ){
     $(selector).css( 'display', 'block' );
+    $(selector+'_span').html( '<i class="fas fa-caret-down"></i> ' );
   }else{
     $(selector).css( 'display', 'none' );
+    $(selector+'_span').html( '<i class="fas fa-caret-right"></i> ' );
   }
 }
 </script>
@@ -256,6 +260,8 @@ function displayToggle( selector ){
   text-align: center;
 }
 .subtitle{
+  font-size: 1.75rem;
+  font-weight: 500;
   color: #ee9219;
 }
 #consumption_preferences{
@@ -343,18 +349,20 @@ function displayToggle( selector ){
 
     <div class="row">
       <div class="col">
-        <h3 class="subtitle" onClick="displayToggle('#div_chart');" title="クリックで表示／非表示">性格分析</h3>
+        <div class="subtitle" onClick="displayToggle('#div_chart');" title="クリックで表示／非表示"><span id="div_chart_span" class="caret"><i class="fas fa-caret-down"></i> </span>性格分析</div>
         <div class="my-slider" id="div_chart" style="display: block;">
           <canvas id="myChart"></canvas>
           <div id="category"></div>
         </div>
 
-        <h3 class="subtitle" onClick="displayToggle('#consumption_preferences');" title="クリックで表示／非表示">消費行動傾向</h3>
+        <div id="part_consumption_preferences">
+        <div class="subtitle" onClick="displayToggle('#consumption_preferences');" title="クリックで表示／非表示"><span id="consumption_preferences_span" class="caret"><i class="fas fa-caret-right"></i> </span>消費行動傾向</div>
         <div class="my-slider" id="consumption_preferences" style="display: none;">
           <table class="mytable" id="consumption_preferences_table">
             <tbody id="consumption_preferences_table_tbody">
             </tbody>
           </table>
+        </div>
         </div>
 
         <table class="table">
