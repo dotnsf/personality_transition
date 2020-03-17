@@ -169,7 +169,6 @@ $(function(){
                 var tr = '<tr class="cp-' + cp.index + '">'
                   + '<td class="td-cp-' + cp.score + ' td-cp">' + cp.name + '</td>'
                   + '</tr>';
-                console.log( tr );
                 $('#consumption_preferences_table_tbody').append( tr );
               });
             });
@@ -315,7 +314,7 @@ function displayToggle( selector ){
   </ul>
 </nav>
 
-<div class="container" id="my_wrapper" style="padding: 100px 50px 50px 50px;">
+<div class="_container" id="my_wrapper" style="padding: 30px 50px 50px 50px;">
   <div>
     <table>
       <tr><td>
@@ -360,7 +359,7 @@ function displayToggle( selector ){
 
         <table class="table">
           <tr>
-            <td width="80%">
+            <td width="75%">
               <input class="input-range" id="slider" type="range" value="0" min="0" max="10" step="1" oninput="sliderChange();"/>
             </td>
             <td>
